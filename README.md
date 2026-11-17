@@ -11,6 +11,10 @@
 - Отсев дублей, пересечений голосов, маскированных и нерусских подписей, изменённой скорости.
 - Разделение train/validation/test по связанным исходным записям.
 - GPU-бенчмарк Whisper через faster-whisper и подсчёт WER.
+- Парное сравнение Whisper, GigaAM и Qwen3-ASR на общем WAV-наборе, WER и CER.
+- Частная очередь проверки с волной, выделением и автосохранением.
+- Предложения временных границ от Qwen ForcedAligner и подсказки двух ASR.
+- Экспорт только явно проверенных аудио-текстовых пар для обучения.
 - Создание редактируемых титров, цензуры и хотбара по проверенному плану.
 - Плавные края всех субтитров и измерение боковых отступов по рендеру.
 - Docker Compose для датасета и GPU-распознавания.
@@ -48,6 +52,45 @@ docker compose run --rm --entrypoint python tools -m unittest discover -s tests 
 Модели загружаются по commit revision и SHA256 из `configs/models.lock.json`.
 Повторная команда проверяет имеющиеся файлы, без повторного скачивания.
 Замеры и выбор следующих кандидатов описаны в `docs/MODELS.md`.
+
+## Сравнение и разметка
+
+В пилотном сравнении выбран GigaAM v3 RNN-T. Подробности и ограничения:
+`docs/MODELS.md`. `research` содержит отдельное PyTorch CUDA окружение,
+основной контейнер CTranslate2 остаётся небольшим и независимым от него.
+
+```powershell
+docker compose --profile research build research
+docker compose run --rm tools download-model gigaam-rnnt
+docker compose run --rm tools download-model qwen3-asr-1.7b
+docker compose run --rm tools prepare-evaluation
+docker compose --profile research run --rm research evaluate `
+  --engine gigaam --model local/models/gigaam-rnnt `
+  --output local/comparison/gigaam-rnnt
+docker compose run --rm tools stage-dataset
+docker compose run --rm tools prepare-review-batch --limit 120
+docker compose --profile review up -d --wait review
+```
+
+Страница проверки: `http://127.0.0.1:8765`. Команда подготовки очереди создаёт
+`local/review-batches/current.json` с ID из train/validation и доступными подсказками.
+Существующая очередь не перезаписывается. Для следующей укажите новый `--output`.
+Сохранение: `local/reviews/batch-001.json`. База аудио и хеши не меняются во время
+ручной проверки. Повторный `stage-dataset` требует нового выходного каталога.
+
+Текст можно проверить отдельно от границ. При перемещении границ оценивается
+итоговое выделение. Если все слова слышны целиком, выбирается полное покрытие
+и подтверждаются границы. Обрывок слова нельзя дописывать по смыслу.
+
+```powershell
+docker compose run --rm tools export-reviewed `
+  --review local/reviews/batch-001.json --output local/training-reviewed-v1
+```
+
+JSONL сохраняет исходный проверенный текст. TSV предназначен для GigaAM и
+содержит только строки с поддерживаемым кириллическим алфавитом. Цифры и
+латинские названия требуют проверки произнесённой формы. Список исключений
+сохраняется отдельно. См. `docs/TRAINING.md`.
 
 ## Экспорт проектов в Windows
 

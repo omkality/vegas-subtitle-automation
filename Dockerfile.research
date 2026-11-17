@@ -1,0 +1,23 @@
+# syntax=docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+FROM pytorch/pytorch:2.10.0-cuda12.8-cudnn9-runtime@sha256:b85566342b86d13a67712e9315d40cdc2dad7f8d86df1aff3831f80835edbcca
+ENV PYTHONPATH=/app/src:/opt/gigaam PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    HF_HOME=/app/local/cache/huggingface HOME=/tmp OMP_NUM_THREADS=8 TOKENIZERS_PARALLELISM=false
+WORKDIR /app
+RUN python -m venv --system-site-packages --without-pip /opt/research
+ENV PATH=/opt/research/bin:$PATH
+COPY requirements/research.lock /tmp/research.lock
+# The only source distribution is the pure-Python ANTLR runtime required by OmegaConf.
+# Build isolation is disabled to avoid downloading unpinned build dependencies.
+RUN python -m pip install --no-cache-dir --no-deps --no-build-isolation --require-hashes -r /tmp/research.lock
+COPY configs/vendors.lock.json /tmp/vendors.lock.json
+COPY docker/install_vendor.py /tmp/install_vendor.py
+RUN python /tmp/install_vendor.py \
+    && python -c "import os,imageio_ffmpeg; os.symlink(imageio_ffmpeg.get_ffmpeg_exe(),'/usr/local/bin/ffmpeg')" \
+    && mkdir -p local && chown 1000:1000 local
+COPY src ./src
+COPY tests ./tests
+COPY configs ./configs
+COPY web ./web
+USER 1000:1000
+ENTRYPOINT ["python", "-m", "vegas_subtitles"]
+CMD ["--help"]

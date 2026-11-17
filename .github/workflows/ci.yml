@@ -34,9 +34,10 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          for line in Path('Dockerfile').read_text().splitlines():
-              if line.startswith('FROM '):
-                  assert '@sha256:' in line, line
+          for dockerfile in Path('.').glob('Dockerfile*'):
+              for line in dockerfile.read_text().splitlines():
+                  if line.startswith('FROM '):
+                      assert '@sha256:' in line, (dockerfile, line)
           assert ':latest' not in Path('compose.yaml').read_text()
           for path in Path('.github/workflows').glob('*.yml'):
               for action in re.findall(r'^\s*-\s+uses:\s*([^\s#]+)', path.read_text(), re.M):

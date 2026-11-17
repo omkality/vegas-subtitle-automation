@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir --only-binary=:all: --require-hashes -r requireme
 COPY src ./src
 COPY tests ./tests
 COPY configs ./configs
+COPY web ./web
 RUN mkdir -p local && chown 1000:1000 local
 USER 1000:1000
 ENTRYPOINT ["python", "-m", "vegas_subtitles"]
@@ -28,6 +29,7 @@ RUN pip install --no-cache-dir --only-binary=:all: --require-hashes -r requireme
 COPY src ./src
 COPY tests ./tests
 COPY configs ./configs
+COPY web ./web
 RUN mkdir -p local && chown 1000:1000 local
 USER 1000:1000
 ENTRYPOINT ["python", "-m", "vegas_subtitles"]

@@ -17,3 +17,16 @@ def word_errors(reference: str, hypothesis: str) -> dict:
     errors = previous[-1]
     return {"errors": errors, "reference_words": len(a),
             "wer": errors/len(a) if a else (0. if not b else None)}
+
+
+def character_errors(reference: str, hypothesis: str) -> dict:
+    a,b=' '.join(words(reference)),' '.join(words(hypothesis))
+    previous=list(range(len(b)+1))
+    for i,left in enumerate(a,1):
+        current=[i]
+        for j,right in enumerate(b,1):
+            current.append(min(current[-1]+1,previous[j]+1,previous[j-1]+(left!=right)))
+        previous=current
+    errors=previous[-1]
+    return {'character_errors':errors,'reference_characters':len(a),
+            'cer':errors/len(a) if a else (0. if not b else None)}

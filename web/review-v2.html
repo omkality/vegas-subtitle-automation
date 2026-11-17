@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Проверка речевой разметки</title><link rel="stylesheet" href="/review.css"></head>
+<body><main><h1 id="title">Проверка разметки</h1>
+<p class="intro">Впиши только полностью слышимые слова, включая мат без звёздочек. Нажми на волну, чтобы перейти к нужному месту. Голубые края выделения можно перетаскивать. Можно также поставить звук на паузу и нажать «Начало здесь» или «Конец здесь».</p>
+<p class="intro">Текст и границы подтверждаются отдельно. Если пока трудно выставить границы, проверь только текст и говорящего. Изменения сохраняются автоматически.</p>
+<div class="toolbar"><button class="primary" id="save">Сохранить сейчас</button><button id="backup">Скачать JSON</button><span id="progress"></span><span id="status" role="status">Загрузка…</span></div>
+<div class="pagination"><button id="prev">← Назад</button><span id="page"></span><button id="next">Следующие 20 →</button></div>
+<div id="items"></div><div class="pagination"><button id="next-bottom">Следующие 20 →</button></div>
+</main><script src="/review.js"></script></body></html>

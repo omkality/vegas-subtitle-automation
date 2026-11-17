@@ -18,8 +18,25 @@ x-volumes: &volumes
     read_only: true
 
 services:
+  review:
+    image: vegas-subtitle-automation:0.2.0-tools
+    profiles: [review]
+    volumes:
+      - ./local:/app/local
+    ports:
+      - "127.0.0.1:8765:8765"
+    command: ["review", "--host", "0.0.0.0"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/api/data', timeout=2).read()"]
+      interval: 10s
+      timeout: 3s
+      start_period: 2s
+      retries: 3
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
   tools:
-    image: vegas-subtitle-automation:0.1.0-tools
+    image: vegas-subtitle-automation:0.2.0-tools
     build:
       context: .
       target: tools
@@ -29,8 +46,29 @@ services:
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
 
+  research:
+    image: vegas-subtitle-automation:0.2.0-research
+    build:
+      context: .
+      dockerfile: Dockerfile.research
+    profiles: [research]
+    environment:
+      <<: *media
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes: *volumes
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: ["--help"]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
   asr:
-    image: vegas-subtitle-automation:0.1.0-gpu
+    image: vegas-subtitle-automation:0.2.0-gpu
     build:
       context: .
       target: gpu
