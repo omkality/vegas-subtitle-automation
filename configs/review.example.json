@@ -1,0 +1,7 @@
+{
+  "captions": [
+    {"start": 1.0, "end": 2.5, "speaker": "self", "text": "короткая реплика"},
+    {"start": 2.6, "end": 4.0, "speaker": "friend", "text": "ответ товарища"}
+  ],
+  "bleeps": []
+}

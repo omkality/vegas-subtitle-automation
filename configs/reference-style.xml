@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <track index="0">
+    <event>
+      <take>
+        <generator>
+          <param name="TextColor" type="OFXRGBAParameter" value="R=0.704663217067719,G=1,B=1,A=1," />
+          <param name="collection" type="OFXChoiceParameter" value="None" />
+          <param name="AnimationName" type="OFXStringParameter" value="_None" />
+          <param name="Scale" type="OFXDoubleParameter" value="1" />
+          <param name="Location" type="OFXDouble2DParameter" value="X=0.373655913978495,Y=0.665658093797277," />
+          <param name="Alignment" type="OFXChoiceParameter" value="Center" />
+          <param name="AdvancedGroup" type="OFXParameter" value="" />
+          <param name="FitBackgroundColor" type="OFXBooleanParameter" value="False" />
+          <param name="Background" type="OFXRGBAParameter" value="R=0,G=0,B=0,A=0," />
+          <param name="Tracking" type="OFXDoubleParameter" value="0" />
+          <param name="LineSpacing" type="OFXDoubleParameter" value="1" />
+          <param name="OutlineGroup" type="OFXParameter" value="" />
+          <param name="OutlineWidth" type="OFXDoubleParameter" value="10" />
+          <param name="OutlineColor" type="OFXRGBAParameter" value="R=0,G=0,B=0,A=1," />
+          <param name="ShadowGroup" type="OFXParameter" value="" />
+          <param name="ShadowEnable" type="OFXBooleanParameter" value="False" />
+          <param name="ShadowColor" type="OFXRGBAParameter" value="R=0,G=0,B=0,A=1," />
+          <param name="ShadowOffsetX" type="OFXDoubleParameter" value="0.2" />
+          <param name="ShadowOffsetY" type="OFXDoubleParameter" value="0.2" />
+          <param name="ShadowBlur" type="OFXDoubleParameter" value="0.4" />
+          <param name="Controls" type="OFXParameter" value="" />
+        </generator>
+      </take>
+    </event>
+  </track>
+  <track index="1">
+    <event>
+      <take>
+        <generator>
+          <param name="TextColor" type="OFXRGBAParameter" value="R=1,G=1,B=1,A=1," />
+          <param name="collection" type="OFXChoiceParameter" value="None" />
+          <param name="AnimationName" type="OFXStringParameter" value="_None" />
+          <param name="Scale" type="OFXDoubleParameter" value="0.992024548263077" />
+          <param name="Location" type="OFXDouble2DParameter" value="X=0.505649717514124,Y=0.39268680445151," />
+          <param name="Alignment" type="OFXChoiceParameter" value="Center" />
+          <param name="AdvancedGroup" type="OFXParameter" value="" />
+          <param name="FitBackgroundColor" type="OFXBooleanParameter" value="False" />
+          <param name="Background" type="OFXRGBAParameter" value="R=0,G=0,B=0,A=0," />
+          <param name="Tracking" type="OFXDoubleParameter" value="0" />
+          <param name="LineSpacing" type="OFXDoubleParameter" value="1" />
+          <param name="OutlineGroup" type="OFXParameter" value="" />
+          <param name="OutlineWidth" type="OFXDoubleParameter" value="10" />
+          <param name="OutlineColor" type="OFXRGBAParameter" value="R=0,G=0,B=0,A=1," />
+          <param name="ShadowGroup" type="OFXParameter" value="" />
+          <param name="ShadowEnable" type="OFXBooleanParameter" value="False" />
+          <param name="ShadowColor" type="OFXRGBAParameter" value="R=0,G=0,B=0,A=1," />
+          <param name="ShadowOffsetX" type="OFXDoubleParameter" value="0.2" />
+          <param name="ShadowOffsetY" type="OFXDoubleParameter" value="0.2" />
+          <param name="ShadowBlur" type="OFXDoubleParameter" value="0.4" />
+          <param name="Controls" type="OFXParameter" value="" />
+        </generator>
+      </take>
+    </event>
+  </track>
+</project>

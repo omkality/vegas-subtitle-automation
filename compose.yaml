@@ -1,0 +1,52 @@
+name: vegas-subtitles
+
+x-media: &media
+  VEGAS_MEDIA_ROOT_D: /media/d
+  VEGAS_MEDIA_ROOT_F: /media/f
+
+x-volumes: &volumes
+  - type: bind
+    source: ./local
+    target: /app/local
+  - type: bind
+    source: ${VEGAS_DRIVE_D:-D:/}
+    target: /media/d
+    read_only: true
+  - type: bind
+    source: ${VEGAS_DRIVE_F:-F:/}
+    target: /media/f
+    read_only: true
+
+services:
+  tools:
+    image: vegas-subtitle-automation:0.1.0-tools
+    build:
+      context: .
+      target: tools
+    environment: *media
+    volumes: *volumes
+    command: ["manifest"]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  asr:
+    image: vegas-subtitle-automation:0.1.0-gpu
+    build:
+      context: .
+      target: gpu
+    profiles: [gpu]
+    environment:
+      <<: *media
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes: *volumes
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: ["--help"]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]

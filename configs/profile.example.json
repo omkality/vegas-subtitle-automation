@@ -1,0 +1,13 @@
+{
+  "video": {"width": 1440, "height": 2560, "fps_numerator": 60000, "fps_denominator": 1001},
+  "subtitles": {
+    "font": "Rubik", "outline_width": 10,
+    "minimum_horizontal_margin": 0.12,
+    "fade_in_frames": 6, "fade_out_frames": 7,
+    "short_caption_fade_fraction": 0.2,
+    "self": {"color": "white", "rtf_font_size": 16, "wrap_characters": 22},
+    "friend": {"color": "light-cyan", "rtf_font_size": 12, "wrap_characters": 28, "surround_with_stars": true}
+  },
+  "asr": {"language": "ru", "device": "cuda", "compute_type": "float16", "beam_size": 5},
+  "review": {"required_before_render": true, "training_requires_alignment_approval": true}
+}

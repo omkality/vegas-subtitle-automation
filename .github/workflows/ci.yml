@@ -1,0 +1,44 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate Compose
+        env:
+          VEGAS_DRIVE_D: /tmp
+          VEGAS_DRIVE_F: /tmp
+        run: docker compose --profile gpu config --quiet
+      - name: Build pinned CPU tools image
+        run: docker build --target tools --tag vegas-subtitles:ci .
+      - name: Run tests inside image
+        run: docker run --rm --entrypoint python vegas-subtitles:ci -m unittest discover -s tests -v
+      - name: Reject unpinned upstream image references
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for line in Path('Dockerfile').read_text().splitlines():
+              if line.startswith('FROM '):
+                  assert '@sha256:' in line, line
+          assert ':latest' not in Path('compose.yaml').read_text()
+          for path in Path('.github/workflows').glob('*.yml'):
+              for action in re.findall(r'^\s*-\s+uses:\s*([^\s#]+)', path.read_text(), re.M):
+                  assert re.search(r'@[0-9a-f]{40}$', action), (path, action)
+          PY
