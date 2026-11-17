@@ -3,6 +3,14 @@ const size=20;
 const el=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e};
 const status=document.querySelector('#status');
 function serialize(){return {schema:2,dataset_sha256:data.dataset_sha256,decisions:[...states.values()]}}
+function initialState(r){
+  const previous=r.decision||{};
+  const state={id:r.id,text:r.text,speaker:r.speaker,trim_start:r.trim_start,trim_end:r.trim_end,
+    alignment_reviewed:false,training_approved:false,rejected:false,coverage:'full',
+    text_reviewed:!!previous.training_approved,...previous};
+  if(!state.coverage||state.coverage==='unreviewed')state.coverage='full';
+  return state;
+}
 function approve(s){s.training_approved=!!(s.text_reviewed&&s.alignment_reviewed&&s.coverage==='full'&&!s.rejected)}
 function changed(){revision++;dirty=true;status.textContent='Сохраняю…';clearTimeout(saveTimer);saveTimer=setTimeout(save,800);update()}
 async function save(){
@@ -79,4 +87,4 @@ document.querySelector('#jump').onclick=()=>goTo(Number(document.querySelector('
 document.querySelector('#resume').onclick=()=>{const index=data.items.findIndex(r=>{const s=states.get(r.id);return !s.training_approved&&!s.rejected});if(index>=0)goTo(Math.floor(index/size));else status.textContent='Все примеры проверены или отклонены.'};
 document.querySelector('#backup').onclick=()=>{const blob=new Blob([JSON.stringify(serialize(),null,2)],{type:'application/json'});const a=el('a');a.href=URL.createObjectURL(blob);a.download='vegas-review.json';a.click();URL.revokeObjectURL(a.href)};
 window.onbeforeunload=e=>{if(dirty){e.preventDefault();e.returnValue=''}};
-fetch('/api/data').then(r=>r.json()).then(d=>{data=d;document.querySelector('#title').textContent=d.title;for(const r of d.items){const previous=r.decision||{};states.set(r.id,{id:r.id,text:r.text,speaker:r.speaker,trim_start:r.trim_start,trim_end:r.trim_end,alignment_reviewed:false,training_approved:false,rejected:false,coverage:previous.training_approved?'full':'unreviewed',text_reviewed:!!previous.training_approved,...previous})}const location=new URLSearchParams(window.location.hash.slice(1));const requested=Number(location.get('page'))-1;const first=data.items.findIndex(r=>{const s=states.get(r.id);return !s.training_approved&&!s.rejected});page=location.get('batch')===d.dataset_sha256.slice(0,12)&&Number.isInteger(requested)&&requested>=0&&requested<Math.ceil(d.items.length/size)?requested:Math.max(0,Math.floor(first/size));render();status.textContent='Готово. Изменения сохраняются автоматически.'}).catch(e=>status.textContent=e.message);
+fetch('/api/data').then(r=>r.json()).then(d=>{data=d;document.querySelector('#title').textContent=d.title;for(const r of d.items)states.set(r.id,initialState(r));const location=new URLSearchParams(window.location.hash.slice(1));const requested=Number(location.get('page'))-1;const first=data.items.findIndex(r=>{const s=states.get(r.id);return !s.training_approved&&!s.rejected});page=location.get('batch')===d.dataset_sha256.slice(0,12)&&Number.isInteger(requested)&&requested>=0&&requested<Math.ceil(d.items.length/size)?requested:Math.max(0,Math.floor(first/size));render();status.textContent='Готово. Изменения сохраняются автоматически.'}).catch(e=>status.textContent=e.message);
