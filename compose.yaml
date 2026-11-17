@@ -19,13 +19,13 @@ x-volumes: &volumes
 
 services:
   review:
-    image: vegas-subtitle-automation:0.3.0-tools
+    image: vegas-subtitle-automation:0.3.1-tools
     profiles: [review]
     volumes:
       - ./local:/app/local
     ports:
       - "127.0.0.1:8765:8765"
-    command: ["review", "--host", "0.0.0.0"]
+    command: ["review", "--host", "0.0.0.0", "--dataset", "${VEGAS_REVIEW_DATASET:-local/training-staged/dataset.json}", "--batch", "${VEGAS_REVIEW_BATCH:-local/review-batches/current.json}", "--saved", "${VEGAS_REVIEW_SAVED:-local/reviews/batch-001.json}"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/api/data', timeout=2).read()"]
       interval: 10s
@@ -36,7 +36,7 @@ services:
     cap_drop: [ALL]
 
   tools:
-    image: vegas-subtitle-automation:0.3.0-tools
+    image: vegas-subtitle-automation:0.3.1-tools
     build:
       context: .
       target: tools
@@ -47,7 +47,7 @@ services:
     cap_drop: [ALL]
 
   research:
-    image: vegas-subtitle-automation:0.3.0-research
+    image: vegas-subtitle-automation:0.3.1-research
     build:
       context: .
       dockerfile: Dockerfile.research
@@ -68,7 +68,7 @@ services:
     cap_drop: [ALL]
 
   asr:
-    image: vegas-subtitle-automation:0.3.0-gpu
+    image: vegas-subtitle-automation:0.3.1-gpu
     build:
       context: .
       target: gpu

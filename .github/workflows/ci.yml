@@ -2,7 +2,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, dev, 'feat/**', 'fix/**', 'docs/**']
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,12 @@ jobs:
         env:
           VEGAS_DRIVE_D: /tmp
           VEGAS_DRIVE_F: /tmp
-        run: docker compose --profile gpu config --quiet
+        run: docker compose --profile gpu --profile research --profile review config --quiet
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22.23.4'
+      - name: Check review interface save ordering and navigation
+        run: node --test tests/test_review_ui.cjs
       - name: Build pinned CPU tools image
         run: docker build --target tools --tag vegas-subtitles:ci .
       - name: Run tests inside image

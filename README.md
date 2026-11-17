@@ -1,5 +1,12 @@
 # VEGAS Subtitle Automation
 
+[![CI main](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml?query=branch%3Amain)
+[![CI dev](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml/badge.svg?branch=dev&event=push)](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml?query=branch%3Adev)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![CUDA 12.8](https://img.shields.io/badge/CUDA-12.8-76B900?logo=nvidia&logoColor=white)](Dockerfile.research)
+[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](compose.yaml)
+[![VEGAS Pro](https://img.shields.io/badge/VEGAS-Pro_23-2465F5)](vegas/)
+
 Локальный прототип для субтитров игровых роликов в VEGAS Pro. Извлекает готовые
 титры и исходные аудиоинтервалы из `.veg`, собирает кандидатов для датасета,
 сравнивает ASR-модели на отложенных записях и применяет проверенный план в VEGAS.
@@ -25,12 +32,32 @@
 адаптера ещё не объединены в готовый конвейер. Это основа для измеримого
 улучшения, а не обещание безошибочной расшифровки одним запуском.
 
+[Выбор моделей и измерения](docs/MODELS.md) ·
+[Подготовка обучения](docs/TRAINING.md) ·
+[Разметка и управление пачками](docs/ANNOTATION.md) ·
+[Docker и CI/CD](docs/OPERATIONS.md) ·
+[Разработка](CONTRIBUTING.md) · [История изменений](CHANGELOG.md)
+
 ## Архитектура
 
 VEGAS и C#-скрипты работают в Windows. Linux-контейнеры получают XML-экспорт и
 исходные записи через тома только для чтения. Модели, датасет и результаты
 хранятся в `local/`, которая исключена из Git и контекста Docker-сборки.
 Медиа не отправляются во внешние API. Загрузка моделей обращается к их хостингу.
+
+```mermaid
+flowchart LR
+    V[VEGAS Pro в Windows] --> X[XML и ссылки на исходный звук]
+    X --> D[Приватный корпус и группы записей]
+    D --> R[Интерфейс проверки текста и границ]
+    R --> T[Проверенные train и validation]
+    T --> A[Сравнение ASR на GPU]
+    R --> P[Проверенный план титров и цензуры]
+    P --> V
+```
+
+Код и конфигурация публикуются в Git. WAV, `.veg`, веса, пользовательские
+ответы и подробные расшифровки сохраняются только в `local/`.
 
 ## Docker Compose
 

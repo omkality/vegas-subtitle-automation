@@ -1,13 +1,17 @@
-let data, states=new Map(), dirty=false, page=0, saveTimer;
+let data, states=new Map(), dirty=false, page=0, saveTimer, revision=0, saveChain=Promise.resolve();
 const size=20;
 const el=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e};
 const status=document.querySelector('#status');
 function serialize(){return {schema:2,dataset_sha256:data.dataset_sha256,decisions:[...states.values()]}}
 function approve(s){s.training_approved=!!(s.text_reviewed&&s.alignment_reviewed&&s.coverage==='full'&&!s.rejected)}
-function changed(){dirty=true;status.textContent='Сохраняю…';clearTimeout(saveTimer);saveTimer=setTimeout(save,800);update()}
+function changed(){revision++;dirty=true;status.textContent='Сохраняю…';clearTimeout(saveTimer);saveTimer=setTimeout(save,800);update()}
 async function save(){
-  try{const r=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(serialize())});const result=await r.json();if(!r.ok)throw Error(result.error);dirty=false;status.textContent='Все изменения сохранены';status.classList.remove('error')}
-  catch(e){status.textContent='Не удалось сохранить: '+e.message;status.classList.add('error')}
+  clearTimeout(saveTimer);
+  const savedRevision=revision, body=JSON.stringify(serialize());
+  const operation=saveChain.catch(()=>{}).then(async()=>{const r=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body});const result=await r.json();if(!r.ok)throw Error(result.error)});
+  saveChain=operation;
+  try{await operation;if(savedRevision===revision){dirty=false;status.textContent='Все изменения сохранены';status.classList.remove('error')}return true}
+  catch(e){status.textContent='Не удалось сохранить: '+e.message;status.classList.add('error');return false}
 }
 function update(){
   const rows=[...states.values()], text=rows.filter(s=>s.text_reviewed).length, complete=rows.filter(s=>s.training_approved).length, rejected=rows.filter(s=>s.rejected).length;
@@ -67,9 +71,12 @@ function cardFor(r,index){
   if(Object.keys(r.prediction).length){const d=el('details');d.append(el('summary','Подсказки моделей'));d.append(el('pre',Object.entries(r.prediction).map(([k,v])=>`${k}: ${v}`).join('\n')));card.append(d)}
   const note=el('small',`ID: ${r.id} · контекст ${duration.toFixed(2)} с`);card.append(note);paint();draw();return card;
 }
-function render(){const area=document.querySelector('#items');area.replaceChildren();data.items.slice(page*size,(page+1)*size).forEach((r,i)=>area.append(cardFor(r,page*size+i)));document.querySelector('#page').textContent=`${page+1} / ${Math.ceil(data.items.length/size)}`;document.querySelector('#prev').disabled=page===0;for(const id of ['next','next-bottom'])document.querySelector('#'+id).disabled=(page+1)*size>=data.items.length;update()}
-async function turn(delta){if(dirty)await save();page+=delta;render();window.scrollTo({top:0,behavior:'smooth'})}
+function render(){const area=document.querySelector('#items');area.replaceChildren();data.items.slice(page*size,(page+1)*size).forEach((r,i)=>area.append(cardFor(r,page*size+i)));const pages=Math.max(1,Math.ceil(data.items.length/size));document.querySelector('#page').textContent=`${page+1} / ${pages}`;document.querySelector('#page-number').value=page+1;document.querySelector('#page-number').max=pages;document.querySelector('#prev').disabled=page===0;for(const id of ['next','next-bottom'])document.querySelector('#'+id).disabled=(page+1)*size>=data.items.length;history.replaceState(null,'',`#batch=${data.dataset_sha256.slice(0,12)}&page=${page+1}`);update()}
+async function goTo(next){if(!Number.isInteger(next)||next<0||next>=Math.ceil(data.items.length/size))return;if(dirty&&!await save())return;document.querySelectorAll('audio').forEach(a=>a.pause());page=next;render();window.scrollTo({top:0,behavior:'smooth'})}
+async function turn(delta){await goTo(page+delta)}
 document.querySelector('#save').onclick=save;document.querySelector('#prev').onclick=()=>turn(-1);document.querySelector('#next').onclick=document.querySelector('#next-bottom').onclick=()=>turn(1);
+document.querySelector('#jump').onclick=()=>goTo(Number(document.querySelector('#page-number').value)-1);
+document.querySelector('#resume').onclick=()=>{const index=data.items.findIndex(r=>{const s=states.get(r.id);return !s.training_approved&&!s.rejected});if(index>=0)goTo(Math.floor(index/size));else status.textContent='Все примеры проверены или отклонены.'};
 document.querySelector('#backup').onclick=()=>{const blob=new Blob([JSON.stringify(serialize(),null,2)],{type:'application/json'});const a=el('a');a.href=URL.createObjectURL(blob);a.download='vegas-review.json';a.click();URL.revokeObjectURL(a.href)};
 window.onbeforeunload=e=>{if(dirty){e.preventDefault();e.returnValue=''}};
-fetch('/api/data').then(r=>r.json()).then(d=>{data=d;document.querySelector('#title').textContent=d.title;for(const r of d.items){const previous=r.decision||{};states.set(r.id,{id:r.id,text:r.text,speaker:r.speaker,trim_start:r.trim_start,trim_end:r.trim_end,alignment_reviewed:false,training_approved:false,rejected:false,coverage:previous.training_approved?'full':'unreviewed',text_reviewed:!!previous.training_approved,...previous})}render();status.textContent='Готово. Изменения сохраняются автоматически.'}).catch(e=>status.textContent=e.message);
+fetch('/api/data').then(r=>r.json()).then(d=>{data=d;document.querySelector('#title').textContent=d.title;for(const r of d.items){const previous=r.decision||{};states.set(r.id,{id:r.id,text:r.text,speaker:r.speaker,trim_start:r.trim_start,trim_end:r.trim_end,alignment_reviewed:false,training_approved:false,rejected:false,coverage:previous.training_approved?'full':'unreviewed',text_reviewed:!!previous.training_approved,...previous})}const location=new URLSearchParams(window.location.hash.slice(1));const requested=Number(location.get('page'))-1;const first=data.items.findIndex(r=>{const s=states.get(r.id);return !s.training_approved&&!s.rejected});page=location.get('batch')===d.dataset_sha256.slice(0,12)&&Number.isInteger(requested)&&requested>=0&&requested<Math.ceil(d.items.length/size)?requested:Math.max(0,Math.floor(first/size));render();status.textContent='Готово. Изменения сохраняются автоматически.'}).catch(e=>status.textContent=e.message);

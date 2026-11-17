@@ -18,6 +18,7 @@ def serve(dataset: Path, batch: Path, saved: Path, host: str='127.0.0.1', port: 
     selected={r['id']:r for r in package['items'] if r['id'] in ids}
     if len(selected)!=len(ids):raise ValueError('Review batch contains missing or duplicate IDs')
     dataset_hash=fingerprint(dataset)
+    if spec.get('dataset_sha256',dataset_hash)!=dataset_hash:raise ValueError('Batch belongs to a different dataset')
     save_lock=threading.Lock()
     predictions=spec.get('predictions',{})
     web=Path(__file__).resolve().parents[2]/'web'

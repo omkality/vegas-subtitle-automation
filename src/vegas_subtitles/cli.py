@@ -54,6 +54,14 @@ def main() -> None:
     batch.add_argument('--output',type=Path,default=Path('local/review-batches/current.json'))
     batch.add_argument('--audit-root',type=Path,default=Path('local/label-audit'))
     batch.add_argument('--limit',type=int,default=120)
+    batch.add_argument('--exclude-batch',type=Path,action='append',default=[])
+    batch.add_argument('--selection',choices=['prioritized','balanced'],default='prioritized')
+    context=commands.add_parser('extend-review-context',help='Prepare a new review dataset with wider audio context')
+    context.add_argument('--dataset',type=Path,default=Path('local/training-staged/dataset.json'))
+    context.add_argument('--batch',type=Path,required=True)
+    context.add_argument('--output',type=Path,required=True)
+    context.add_argument('--padding',type=float,default=2.5)
+    context.add_argument('--workers',type=int,default=4)
     align=commands.add_parser('suggest-alignment',help='Suggest boundaries without approving labels')
     align.add_argument('--dataset',type=Path,default=Path('local/training-staged/dataset.json'))
     align.add_argument('--model',type=Path,default=Path('local/models/qwen3-aligner'))
@@ -119,7 +127,10 @@ def main() -> None:
         serve(args.dataset,args.batch,args.saved,args.host,args.port)
     elif args.command == 'prepare-review-batch':
         from .review_batch import prepare_batch
-        print(json.dumps(prepare_batch(args.dataset,args.output,args.audit_root,args.limit),ensure_ascii=False,indent=2))
+        print(json.dumps(prepare_batch(args.dataset,args.output,args.audit_root,args.limit,tuple(args.exclude_batch),args.selection),ensure_ascii=False,indent=2))
+    elif args.command == 'extend-review-context':
+        from .review_batch import extend_context
+        print(json.dumps(extend_context(args.dataset,args.batch,args.output,args.padding,args.workers),ensure_ascii=False,indent=2))
     elif args.command == 'suggest-alignment':
         from .alignment import suggest
         result=suggest(args.dataset,args.model,args.output)
