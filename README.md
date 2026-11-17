@@ -1,7 +1,7 @@
 # VEGAS Subtitle Automation
 
-[![CI main](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml?query=branch%3Amain)
-[![CI dev](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml/badge.svg?branch=dev&event=push)](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml?query=branch%3Adev)
+[![CI main](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml?query=branch%3Amain)
+[![CI dev](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/omkality/vegas-subtitle-automation/actions/workflows/ci.yml?query=branch%3Adev)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![CUDA 12.8](https://img.shields.io/badge/CUDA-12.8-76B900?logo=nvidia&logoColor=white)](Dockerfile.research)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](compose.yaml)
