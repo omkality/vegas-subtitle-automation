@@ -11,3 +11,5 @@ setuptools==80.9.0
 wheel==0.45.1
 # Shadow the base's older development helper to match the HF Hub Click requirement.
 spin==0.19
+onnx-asr==0.12.0
+onnxruntime-gpu==1.23.2

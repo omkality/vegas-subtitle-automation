@@ -160,5 +160,145 @@
         "bytes": 998
       }
     }
+  },
+  "parakeet-tdt-v3": {
+    "repository": "nvidia/parakeet-tdt-0.6b-v3",
+    "revision": "541d1f99c6b0c3cd0b11a95167540bb8edefd82b",
+    "files": {
+      "config.json": {
+        "sha256": "e747b85e1bdfd300c8b8ac63bac8dd5221f8fe9bc275b48d06c735fcd6971b6e",
+        "bytes": 1153
+      },
+      "generation_config.json": {
+        "sha256": "b141de6ec6d7f982ece13f98f604e3fe1807ea9c0e839185d0ab7064604209d0",
+        "bytes": 289
+      },
+      "model.safetensors": {
+        "sha256": "3a2026366188c8c68598edbbff92f8d11590a08e0ae2e6775544e7b07d6a5e11",
+        "bytes": 2508311120
+      },
+      "processor_config.json": {
+        "sha256": "8346a93a3b987fa1dec57a78f045cd0817d21786589a5a096b41a57a446fd1d7",
+        "bytes": 392
+      },
+      "tokenizer.json": {
+        "sha256": "bd321b096832a3f270bd3b2a88823957920f1a5c5ada71114a26ea729d0cbe91",
+        "bytes": 1159960
+      },
+      "tokenizer_config.json": {
+        "sha256": "0b2fe0037599ee335f0b972fa682bf0ece74e4ccfec755cb7daa3405d3d3e874",
+        "bytes": 290
+      }
+    }
+  },
+  "gigaam-ctc": {
+    "repository": "ai-sage/GigaAM-v3",
+    "revision": "15ef3b5a88da78f93134b3cb7f015c70aefa8946",
+    "files": {
+      "config.json": {
+        "sha256": "5db9b9e3f8c1a6193f3e262857cbaa75f4fd7653990de846162ad7318f61bdb5",
+        "bytes": 2117
+      },
+      "pytorch_model.bin": {
+        "sha256": "64d9c925df4bfd57e19f7b26d001106f9c5a35bd088a71c5bde071bf92c4a559",
+        "bytes": 441719299
+      }
+    }
+  },
+  "gigaam-e2e-ctc": {
+    "repository": "ai-sage/GigaAM-v3",
+    "revision": "cec030b4c4f35d928e4a9044a3bdb29ebd499fac",
+    "files": {
+      "config.json": {
+        "sha256": "3dbcd2ebe1a572cb9a9945eeb3faf8b59180d408e61a61ecda44db30421e7251",
+        "bytes": 1623
+      },
+      "pytorch_model.bin": {
+        "sha256": "9801f83ef3979779982c4f83ec1c234d7571e8c1a5aa2bfc0b09ceb97a16cd75",
+        "bytes": 442405251
+      },
+      "tokenizer.model": {
+        "sha256": "0b9a1960898fbfdf5424ab852ea17445eb3da960fba23e977ff100eb0054fbc8",
+        "bytes": 240941
+      }
+    }
+  },
+  "gigaam-multilingual": {
+    "repository": "ai-sage/GigaAM-Multilingual",
+    "revision": "2f8a57144e6ec3adfd32fe0484d9ea9913305bc8",
+    "files": {
+      "config.json": {
+        "sha256": "c830232c7d51688a630a221517b52585ab5ee57e1d3c21bcbae01759351d2653",
+        "bytes": 2623
+      },
+      "pytorch_model.bin": {
+        "sha256": "e1db43873ec5e296f229572e06e2470fc157ac9f8d4aacabda295630b9b91728",
+        "bytes": 883170115
+      }
+    }
+  },
+  "t-one": {
+    "repository": "t-tech/T-one",
+    "revision": "106f3b0b32a9e107eb613312e4ebc61ff3d53926",
+    "files": {
+      "config.json": {
+        "sha256": "8a6272e21a05301afac2686f6066554151f9cd85bd0d817297339e8c3dc778a6",
+        "bytes": 1821
+      },
+      "model.onnx": {
+        "sha256": "707e4a282d5036304a0b8603ad83945840c3075f53c49911ef88c19bcc5a7d52",
+        "bytes": 144193371
+      },
+      "vocab.json": {
+        "sha256": "9b5c1255eb3d2e2bcd3021fd9edb606fef735c3a3fc9841e56f3014829ea25a6",
+        "bytes": 415
+      }
+    }
+  },
+  "whisper-large-v3-russian": {
+    "repository": "antony66/whisper-large-v3-russian",
+    "revision": "3c24e46392ff376009a176ad290fe83e368edf7a",
+    "files": {
+      "added_tokens.json": {
+        "sha256": "3c51f66c4c21f9e126970078f11ae77a78c74aee8df606ee9daba86e467108e0",
+        "bytes": 34648
+      },
+      "config.json": {
+        "sha256": "7b6f96d197cce45831fefcb455988c4a0dd813fc91003966aa22e900a08503ac",
+        "bytes": 1268
+      },
+      "generation_config.json": {
+        "sha256": "f9d9c21d1c1b9f72df2bcd99b9558d6560071609d0ef5e05c9511f94e86d23e4",
+        "bytes": 3896
+      },
+      "merges.txt": {
+        "sha256": "2df2990a395e35e8dfbc7511e08c12d56018d8d04691e0133e5d63b21e154dc6",
+        "bytes": 493869
+      },
+      "model.safetensors": {
+        "sha256": "8eca426464823c28293a4d68be605020c6c3dca8050d5b4e4b4c8118c561382e",
+        "bytes": 3087132232
+      },
+      "normalizer.json": {
+        "sha256": "bf1c507dc8724ca9cf9903640dacfb69dae2f00edee4f21ceba106a7392f26dd",
+        "bytes": 52666
+      },
+      "preprocessor_config.json": {
+        "sha256": "7ccc62c6f2765af1f3b46c00c9b5894426835a05021c8b9c01eecb6dfb542711",
+        "bytes": 340
+      },
+      "special_tokens_map.json": {
+        "sha256": "baea4ea09372eb4fca86b4e4346139fd73cb807d5087e9de0948e971739c3e74",
+        "bytes": 2186
+      },
+      "tokenizer_config.json": {
+        "sha256": "844b642c73a91359722f47b35705f7174686df33d252695d8572cf9ac03a6389",
+        "bytes": 282843
+      },
+      "vocab.json": {
+        "sha256": "e2aa043ef015641d363d8288e7c241c85e36a5c761fb303598e0710233344387",
+        "bytes": 1036558
+      }
+    }
   }
 }

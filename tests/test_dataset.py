@@ -5,7 +5,7 @@ import unittest
 import wave
 
 from vegas_subtitles.dataset import export_reviewed
-from vegas_subtitles.evaluation import fingerprint
+from vegas_subtitles.evaluation import fingerprint, from_reviewed
 from vegas_subtitles.engines import native_giga_config
 from vegas_subtitles.metrics import character_errors
 from vegas_subtitles.training_text import gigaam_label
@@ -80,6 +80,13 @@ class ReviewedDatasetTests(unittest.TestCase):
 
 
 class BackendConfigTests(unittest.TestCase):
+    def test_development_diagnostic_refuses_holdout_examples(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);manifest=root/'holdout.jsonl'
+            manifest.write_text(json.dumps({'split':'holdout','label_source':'explicit_human_review','alignment_reviewed':True})+'\n')
+            with self.assertRaisesRegex(ValueError,'requested split'):
+                from_reviewed(manifest,root/'diagnostic','development')
+            self.assertFalse((root/'diagnostic').exists())
     def test_review_queue_never_consumes_final_holdout_or_overwrites_progress(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);dataset=root/'dataset.json'

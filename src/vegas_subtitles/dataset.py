@@ -117,6 +117,8 @@ def export_reviewed(dataset_path: Path, review_path: Path, output: Path) -> dict
             usable=[r for r in rows if r['gigaam_normalization']['supported']]
             writer.writerows((r['audio'],r['duration'],r['gigaam_normalization']['text']) for r in usable)
             giga_counts[split]=len(usable)
+    development=[r for split,rows in manifests.items() if split in ('train','validation') for r in rows]
+    (output/'development.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in development),encoding='utf-8')
     summary={'approved':len(approved),'splits':dict(counts),'dataset_sha256':fingerprint(dataset_path),
              'review_sha256':hashlib.sha256(review_bytes).hexdigest(),'training_run':False,
              'gigaam_splits':dict(giga_counts),'gigaam_excluded_labels':len(excluded)}

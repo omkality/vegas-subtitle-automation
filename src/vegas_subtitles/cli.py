@@ -26,12 +26,15 @@ def main() -> None:
     gold=commands.add_parser('prepare-reviewed-evaluation',help='Freeze human-corrected shared audio for a new paired comparison')
     gold.add_argument('--manifest',type=Path,required=True)
     gold.add_argument('--output',type=Path,required=True)
-    gold.add_argument('--split',choices=['validation','holdout'],default='validation')
+    gold.add_argument('--split',choices=['validation','holdout','development'],default='validation')
     paired=commands.add_parser('evaluate',help='Evaluate a backend on a frozen paired audio set')
     paired.add_argument('--set',type=Path,default=Path('local/evaluation/validation/set.json'))
-    paired.add_argument('--engine',choices=['whisper','qwen','gigaam'],required=True)
+    paired.add_argument('--engine',choices=['whisper','qwen','gigaam','parakeet','russian-whisper','russian-whisper-beam5','t-one'],required=True)
     paired.add_argument('--model',type=Path,required=True)
     paired.add_argument('--output',type=Path,required=True)
+    compare=commands.add_parser('comparison-report',help='Verify paired runs and render a private comparison report')
+    compare.add_argument('--runs',type=Path,required=True)
+    compare.add_argument('--output',type=Path,required=True)
     staging=commands.add_parser('stage-dataset',help='Extract private audio and reserve unseen recording groups')
     staging.add_argument('--manifest',type=Path,default=Path('local/dataset/manifest.jsonl'))
     staging.add_argument('--output',type=Path,default=Path('local/training-staged'))
@@ -58,7 +61,7 @@ def main() -> None:
     audit=commands.add_parser('audit-labels',help='Generate private ASR suggestions for train/validation only')
     audit.add_argument('--dataset',type=Path,default=Path('local/training-staged/dataset.json'))
     audit.add_argument('--model',type=Path,required=True)
-    audit.add_argument('--engine',choices=['gigaam','whisper','qwen'],required=True)
+    audit.add_argument('--engine',choices=['gigaam','whisper','qwen','parakeet','russian-whisper','russian-whisper-beam5','t-one'],required=True)
     audit.add_argument('--output',type=Path,required=True)
     benchmark = commands.add_parser("benchmark", help="Evaluate a local ASR model on held-out recordings")
     benchmark.add_argument("--manifest", type=Path, default=Path("local/dataset/manifest.jsonl"))
@@ -100,6 +103,9 @@ def main() -> None:
         result=evaluate(args.set,args.engine,args.model,args.output)
         print(json.dumps(result,ensure_ascii=False,indent=2))
         if result['failed_samples']:raise SystemExit(1)
+    elif args.command == 'comparison-report':
+        from .comparison_report import generate
+        print(json.dumps(generate(args.runs,args.output),ensure_ascii=False,indent=2))
     elif args.command == 'stage-dataset':
         from .dataset import stage
         result=stage(args.manifest,args.output,args.workers)

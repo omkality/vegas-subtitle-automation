@@ -12,6 +12,8 @@
 - Разделение train/validation/test по связанным исходным записям.
 - GPU-бенчмарк Whisper через faster-whisper и подсчёт WER.
 - Парное сравнение Whisper, GigaAM и Qwen3-ASR на общем WAV-наборе, WER и CER.
+- Дополнительные GPU-бэкенды: NVIDIA Parakeet TDT, T-one ONNX и русская адаптация Whisper.
+- Раздельные оценки validation и development, дополнительные словарные диагностики мата.
 - Частная очередь проверки с волной, выделением и автосохранением.
 - Предложения временных границ от Qwen ForcedAligner и подсказки двух ASR.
 - Экспорт только явно проверенных аудио-текстовых пар для обучения.
@@ -59,6 +61,11 @@ docker compose run --rm --entrypoint python tools -m unittest discover -s tests 
 `docs/MODELS.md`. `research` содержит отдельное PyTorch CUDA окружение,
 основной контейнер CTranslate2 остаётся небольшим и независимым от него.
 
+После ручной разметки сравнивались 12 конфигураций 11 моделей на 98 общих
+фрагментах. Из них только 14 относятся к validation. Остальные предназначены
+для будущего обучения. Все 98 вместе служат диагностикой, независимым тестом
+такой результат не является. Holdout остаётся исключённым.
+
 ```powershell
 docker compose --profile research build research
 docker compose run --rm tools download-model gigaam-rnnt
@@ -91,6 +98,19 @@ JSONL сохраняет исходный проверенный текст. TSV
 содержит только строки с поддерживаемым кириллическим алфавитом. Цифры и
 латинские названия требуют проверки произнесённой формы. Список исключений
 сохраняется отдельно. См. `docs/TRAINING.md`.
+
+Экспорт также создаёт `development.jsonl` из train/validation. Для диагностики
+его можно подготовить с `prepare-reviewed-evaluation --split development`.
+Параметр указан явно, чтобы диагностический набор не подменял validation.
+Итоговый отчёт собирается командой:
+
+```powershell
+docker compose run --rm tools comparison-report `
+  --runs local/comparison-expanded --output local/reports/expanded
+```
+
+Команда проверяет общий набор и создаёт JSON/HTML. Словарный подсчёт семейств
+мата не измеряет качество запикивания или ошибки временных границ.
 
 ## Экспорт проектов в Windows
 
