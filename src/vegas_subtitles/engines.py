@@ -61,22 +61,28 @@ def native_giga_config(value):
     return result
 
 
+def load_native_gigaam(folder: Path):
+    import torch
+    from omegaconf import OmegaConf
+    from gigaam.model import GigaAMASR
+
+    data = json.loads((folder / 'config.json').read_text(encoding='utf-8'))
+    cfg = native_giga_config(data['cfg']['model']['cfg'])
+    if cfg.get('decoding', {}).get('model_path'):
+        cfg['decoding']['model_path'] = str(folder / 'tokenizer.model')
+    model = GigaAMASR(OmegaConf.create(cfg))
+    state = torch.load(folder / 'pytorch_model.bin', map_location='cpu', weights_only=True)
+    if all(key.startswith('model.') for key in state):
+        state = {key.removeprefix('model.'): value for key, value in state.items()}
+    model.load_state_dict(state, strict=True)
+    return model
+
+
 class GigaAM:
     def __init__(self, folder: Path):
         import torch
-        from omegaconf import OmegaConf
-        from gigaam.model import GigaAMASR
         torch.set_num_threads(8)
-        data=json.loads((folder/'config.json').read_text())
-        cfg=native_giga_config(data['cfg']['model']['cfg'])
-        if cfg.get('decoding',{}).get('model_path'):
-            cfg['decoding']['model_path']=str(folder/'tokenizer.model')
-        self.model=GigaAMASR(OmegaConf.create(cfg))
-        state=torch.load(folder/'pytorch_model.bin',map_location='cpu',weights_only=True)
-        if all(k.startswith('model.') for k in state):
-            state={k.removeprefix('model.'):v for k,v in state.items()}
-        self.model.load_state_dict(state,strict=True)
-        self.model=self.model.eval().to('cuda')
+        self.model=load_native_gigaam(folder).eval().to('cuda')
         self.model.encoder=self.model.encoder.half()
         self.settings={'engine':'native-gigaam','encoder_dtype':'float16','decoding':'greedy',
                        'vendor_revision':'7447938d791c4f3e643386ee22c33777004293a5','strict_weight_load':True}
