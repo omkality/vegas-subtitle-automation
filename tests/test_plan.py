@@ -15,3 +15,11 @@ class PlanTests(unittest.TestCase):
     def test_unknown_voice_must_be_reviewed(self):
         with self.assertRaisesRegex(ValueError,"reviewed"):
             validate_plan([{"start":1.,"end":2.,"speaker":"unknown","text":"слово"}], [])
+
+    def test_whisper_credit_blocks_export_even_inside_a_caption(self):
+        for text in ("Субтитры сделал DimaTorzok", "Продолжаем. СУБТИТРЫ\nсоздавал dimatorzok!"):
+            with self.subTest(text=text), self.assertRaisesRegex(ValueError, r"1\.250.*Whisper"):
+                validate_plan([{"start":1.25,"end":2.,"speaker":"self","text":text}], [])
+
+    def test_name_alone_does_not_block_export(self):
+        validate_plan([{"start":1.,"end":2.,"speaker":"self","text":"Привет, DimaTorzok!"}], [])

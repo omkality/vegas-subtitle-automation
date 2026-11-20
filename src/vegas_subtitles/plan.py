@@ -2,19 +2,30 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import shutil
 import textwrap
 import xml.etree.ElementTree as ET
+
+
+WHISPER_SUBTITLE_CREDIT = re.compile(r"\bсубтитры\s+(?:сделал|создавал)\s+dimatorzok\b", re.IGNORECASE)
+
+
+def check_caption_for_whisper_credit(text: str, start: float) -> None:
+    if WHISPER_SUBTITLE_CREDIT.search(text):
+        raise ValueError(f"В субтитре на {start:.3f} с обнаружена ложная подпись Whisper. Исправь текст перед монтажом.")
 
 
 def validate_plan(captions: list[dict], bleeps: list[dict]) -> None:
     for item in captions:
         if item["speaker"] not in {"self", "friend"}:
             raise ValueError("Each caption needs a reviewed self/friend speaker label")
-        if not 0 <= float(item["start"]) < float(item["end"]):
+        start = float(item["start"])
+        if not 0 <= start < float(item["end"]):
             raise ValueError("Invalid caption interval")
         if not item["text"].strip():
             raise ValueError("Empty caption")
+        check_caption_for_whisper_credit(item["text"], start)
     for speaker in ("self", "friend"):
         rows = sorted((c for c in captions if c["speaker"] == speaker), key=lambda c:c["start"])
         if any(a["end"] > b["start"]+.001 for a,b in zip(rows,rows[1:])):

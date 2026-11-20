@@ -3,6 +3,12 @@ const size=20;
 const el=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e};
 const status=document.querySelector('#status');
 function serialize(){return {schema:2,dataset_sha256:data.dataset_sha256,decisions:[...states.values()]}}
+function modelHints(predictions){
+  const whisperCredit = /^субтитры\s+(?:сделал|создавал)\s+dimatorzok[.!…]*$/iu;
+  return Object.entries(predictions)
+    .filter(([model, text]) => model !== 'large-v3' || !whisperCredit.test(text.trim()))
+    .map(([model, text]) => `${model}: ${text}`);
+}
 function initialState(r){
   const previous=r.decision||{};
   const state={id:r.id,text:r.text,speaker:r.speaker,trim_start:r.trim_start,trim_end:r.trim_end,
@@ -76,7 +82,12 @@ function cardFor(r,index){
   const aligned=el('input');aligned.type='checkbox';aligned.checked=s.alignment_reviewed;aligned.onchange=()=>{if(aligned.checked&&s.coverage!=='full'){aligned.checked=false;alert('Для подтверждения границ выбери «Все слова слышны в контексте».');return}s.alignment_reviewed=aligned.checked;paint();changed()};const al=el('label');al.append(aligned,el('span','Границы выделения проверены'));checks.append(al);
   const reject=el('input');reject.type='checkbox';reject.checked=s.rejected;reject.onchange=()=>{s.rejected=reject.checked;if(s.rejected){s.text_reviewed=false;checked.checked=false;s.alignment_reviewed=false;aligned.checked=false}paint();changed()};const rl=el('label');rl.append(reject,el('span','Отклонить пример'));checks.append(rl);card.append(checks,badge);
   const advanced=el('details');advanced.append(el('summary','Точные значения границ'));for(const [key,label]of [['trim_start','Начало'],['trim_end','Конец']]){const l=el('label',label);const n=el('input');n.type='number';n.min=0;n.max=duration;n.step=.01;n.value=Number(s[key]).toFixed(3);n.onchange=()=>boundary(key,Number(n.value));advanced.ontoggle=()=>advanced.querySelectorAll('input').forEach((v,i)=>v.value=Number(s[i?'trim_end':'trim_start']).toFixed(3));l.append(n);advanced.append(l)}card.append(advanced);
-  if(Object.keys(r.prediction).length){const d=el('details');d.append(el('summary','Подсказки моделей'));d.append(el('pre',Object.entries(r.prediction).map(([k,v])=>`${k}: ${v}`).join('\n')));card.append(d)}
+  const hints = modelHints(r.prediction);
+  if (hints.length) {
+    const details = el('details');
+    details.append(el('summary','Подсказки моделей'),el('pre',hints.join('\n')));
+    card.append(details);
+  }
   const note=el('small',`ID: ${r.id} · контекст ${duration.toFixed(2)} с`);card.append(note);paint();draw();return card;
 }
 function render(){const area=document.querySelector('#items');area.replaceChildren();data.items.slice(page*size,(page+1)*size).forEach((r,i)=>area.append(cardFor(r,page*size+i)));const pages=Math.max(1,Math.ceil(data.items.length/size));document.querySelector('#page').textContent=`${page+1} / ${pages}`;document.querySelector('#page-number').value=page+1;document.querySelector('#page-number').max=pages;document.querySelector('#prev').disabled=page===0;for(const id of ['next','next-bottom'])document.querySelector('#'+id).disabled=(page+1)*size>=data.items.length;history.replaceState(null,'',`#batch=${data.dataset_sha256.slice(0,12)}&page=${page+1}`);update()}

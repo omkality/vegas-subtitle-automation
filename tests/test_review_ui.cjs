@@ -28,6 +28,15 @@ function fixture() {
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const ok = { ok: true, json: async () => ({ saved: 1 }) };
 
+test('the known Whisper credit is dropped without dropping another model hint', () => {
+  const { context } = fixture();
+  const hints = vm.runInContext(`modelHints({
+    'large-v3': 'Субтитры создавал DimaTorzok.',
+    'gigaam-rnnt': 'Пошли за ним'
+  })`, context);
+  assert.deepEqual(Array.from(hints), ['gigaam-rnnt: Пошли за ним']);
+});
+
 test('overlapping saves preserve newer edits and send snapshots in order', async () => {
   const { context, requests } = fixture();
   vm.runInContext('changed()', context);

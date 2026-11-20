@@ -164,8 +164,15 @@ def main() -> None:
         from .plan import prepare_job
         print(prepare_job(args.repo.resolve(), args.source, args.review, args.output, args.reference, args.bleep))
     elif args.command == "run-job":
+        from .plan import check_caption_for_whisper_credit
+
         repo=args.repo.resolve()
         plan=ET.parse(repo/"local/jobs/current/edit-plan.xml").getroot()
+        try:
+            for caption in plan.findall("caption"):
+                check_caption_for_whisper_credit(caption.text or "", float(caption.attrib["start"]))
+        except ValueError as exc:
+            parser.error(str(exc))
         if not args.vegas_exe.is_file():
             parser.error("VEGAS executable does not exist")
         process=subprocess.Popen([str(args.vegas_exe),"/NOLOGO","/OPEN",plan.attrib["source"],"/SCRIPT",str(repo/"vegas/ApplyPlan.cs")])
